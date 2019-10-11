@@ -1,40 +1,56 @@
 package com.ayra.academy.ui.home;
 
 import android.os.Bundle;
-import android.view.MenuItem;
-import android.widget.Toast;
-
-import com.ayra.academy.R;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.ayra.academy.R;
+import com.ayra.academy.ui.academy.AcademyFragment;
+import com.ayra.academy.ui.bookmark.BookmarkFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class HomeActivity extends AppCompatActivity {
+    private static final String SELECTED_MENU = "selected_menu";
+    private BottomNavigationView navView;
+    private BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = menuItem -> {
+        Fragment fragment = null;
+        if (menuItem.getItemId() == R.id.navigation_home) {
+            fragment = AcademyFragment.newInstance();
+        } else if (menuItem.getItemId() == R.id.navigation_bookmark) {
+            fragment = BookmarkFragment.newInstance();
+        }
+
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .replace(R.id.container, fragment)
+                    .commit();
+        }
+        return true;
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
+        navView = findViewById(R.id.nav_view);
         navView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
+
+        if (savedInstanceState != null) {
+            savedInstanceState.getInt(SELECTED_MENU);
+        } else {
+            navView.setSelectedItemId(R.id.navigation_home);
+        }
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = menuItem -> {
-        switch (menuItem.getItemId()) {
-            case R.id.navigation_home:
-                Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.navigation_bookmark:
-                Toast.makeText(this, "Bookmark", Toast.LENGTH_SHORT).show();
-                return true;
-        }
-        return false;
-    };
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SELECTED_MENU, navView.getSelectedItemId());
+    }
 
 }

@@ -1,19 +1,34 @@
 package com.ayra.academy.ui.detail;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import com.ayra.academy.R;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.View;
+import com.ayra.academy.ui.reader.CourseReaderActivity;
+import com.ayra.academy.R;
+import com.ayra.academy.data.CourseEntity;
+import com.ayra.academy.utils.DataDummy;
+import com.ayra.academy.utils.GlideApp;
+import com.bumptech.glide.request.RequestOptions;
 
 public class DetailCourseActivity extends AppCompatActivity {
 
     public static final String EXTRA_COURSE = "extra_course";
+    private Button btnStart;
+    private TextView tvTitle, tvDesc, tvDate;
+    private RecyclerView rvModule;
+    private DetailCourseAdapter detailCourseAdapter;
+    private ImageView ivPoster;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,7 +36,53 @@ public class DetailCourseActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail_course);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        detailCourseAdapter = new DetailCourseAdapter();
+        progressBar = findViewById(R.id.progress_bar);
+        btnStart = findViewById(R.id.btn_start);
+        tvTitle = findViewById(R.id.text_title);
+        tvDesc = findViewById(R.id.text_description);
+        tvDate = findViewById(R.id.text_date);
+        rvModule = findViewById(R.id.rv_module);
+        ivPoster = findViewById(R.id.image_poster);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String courseId = extras.getString(EXTRA_COURSE);
+            if (courseId != null) {
+                detailCourseAdapter.setModuleEntities(DataDummy.generateDummyModule(courseId));
+
+                populateCourse(courseId);
+            }
+        }
+
+        rvModule.setNestedScrollingEnabled(false);
+        rvModule.setLayoutManager(new LinearLayoutManager(this));
+        rvModule.setHasFixedSize(true);
+        rvModule.setAdapter(detailCourseAdapter);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvModule.getContext(), DividerItemDecoration.VERTICAL);
+        rvModule.addItemDecoration(dividerItemDecoration);
+    }
+
+    private void populateCourse(String courseId) {
+        CourseEntity entity = DataDummy.getCourse(courseId);
+        tvTitle.setText(entity.getTitle());
+        tvDesc.setText(entity.getDescription());
+        tvDate.setText(String.format("Deadline %s", entity.getDeadline()));
+
+        GlideApp.with(getApplicationContext())
+                .load(entity.getImagePath())
+                .apply(RequestOptions.placeholderOf(R.drawable.ic_loading).error(R.drawable.ic_error))
+                .into(ivPoster);
+
+        btnStart.setOnClickListener(view -> {
+            Intent intent = new Intent(DetailCourseActivity.this, CourseReaderActivity.class);
+            intent.putExtra(CourseReaderActivity.EXTRA_COURSE_ID, courseId);
+            view.getContext().startActivity(intent);
+        });
     }
 
 }

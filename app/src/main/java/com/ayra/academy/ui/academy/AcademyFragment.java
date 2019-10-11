@@ -26,6 +26,10 @@ public class AcademyFragment extends Fragment {
 
     }
 
+    public static Fragment newInstance() {
+        return new AcademyFragment();
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
