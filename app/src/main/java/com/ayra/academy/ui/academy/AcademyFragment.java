@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,9 +16,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.ayra.academy.R;
+import com.ayra.academy.data.CourseEntity;
 import com.ayra.academy.utils.DataDummy;
 
+import java.util.List;
+
 public class AcademyFragment extends Fragment {
+    private AcademyViewModel academyViewModel;
+    private List<CourseEntity> courseEntities;
     private RecyclerView recyclerViewCourse;
     private ProgressBar progressBar;
     private AcademyAdapter academyAdapter;
@@ -50,8 +56,11 @@ public class AcademyFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getActivity() != null) {
+            academyViewModel = ViewModelProviders.of(this).get(AcademyViewModel.class);
+            courseEntities = academyViewModel.getCourses();
+
             academyAdapter = new AcademyAdapter(getActivity());
-            academyAdapter.setListCourse(DataDummy.generateDummyCourse());
+            academyAdapter.setListCourse(courseEntities);
 
             recyclerViewCourse.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerViewCourse.setHasFixedSize(true);

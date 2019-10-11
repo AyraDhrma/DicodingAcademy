@@ -9,16 +9,19 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ayra.academy.ui.reader.CourseReaderActivity;
 import com.ayra.academy.R;
 import com.ayra.academy.data.CourseEntity;
-import com.ayra.academy.utils.DataDummy;
+import com.ayra.academy.data.ModuleEntity;
+import com.ayra.academy.ui.reader.CourseReaderActivity;
 import com.ayra.academy.utils.GlideApp;
 import com.bumptech.glide.request.RequestOptions;
+
+import java.util.List;
 
 public class DetailCourseActivity extends AppCompatActivity {
 
@@ -29,6 +32,8 @@ public class DetailCourseActivity extends AppCompatActivity {
     private DetailCourseAdapter detailCourseAdapter;
     private ImageView ivPoster;
     private ProgressBar progressBar;
+    private DetailCourseViewModel detailCourseViewModel;
+    private List<ModuleEntity> moduleEntityList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +44,8 @@ public class DetailCourseActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        detailCourseViewModel = ViewModelProviders.of(this).get(DetailCourseViewModel.class);
 
         detailCourseAdapter = new DetailCourseAdapter();
         progressBar = findViewById(R.id.progress_bar);
@@ -53,10 +60,14 @@ public class DetailCourseActivity extends AppCompatActivity {
         if (extras != null) {
             String courseId = extras.getString(EXTRA_COURSE);
             if (courseId != null) {
-                detailCourseAdapter.setModuleEntities(DataDummy.generateDummyModule(courseId));
-
-                populateCourse(courseId);
+                detailCourseViewModel.setCourseId(courseId);
+                moduleEntityList = detailCourseViewModel.getModules();
+                detailCourseAdapter.setModuleEntities(moduleEntityList);
             }
+        }
+
+        if (detailCourseViewModel.getCourse() != null) {
+            populateCourse(detailCourseViewModel.getCourse());
         }
 
         rvModule.setNestedScrollingEnabled(false);
@@ -65,22 +76,22 @@ public class DetailCourseActivity extends AppCompatActivity {
         rvModule.setAdapter(detailCourseAdapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvModule.getContext(), DividerItemDecoration.VERTICAL);
         rvModule.addItemDecoration(dividerItemDecoration);
+
     }
 
-    private void populateCourse(String courseId) {
-        CourseEntity entity = DataDummy.getCourse(courseId);
-        tvTitle.setText(entity.getTitle());
-        tvDesc.setText(entity.getDescription());
-        tvDate.setText(String.format("Deadline %s", entity.getDeadline()));
+    private void populateCourse(CourseEntity courses) {
+        tvTitle.setText(courses.getTitle());
+        tvDesc.setText(courses.getDescription());
+        tvDate.setText(String.format("Deadline %s", courses.getDeadline()));
 
         GlideApp.with(getApplicationContext())
-                .load(entity.getImagePath())
+                .load(courses.getImagePath())
                 .apply(RequestOptions.placeholderOf(R.drawable.ic_loading).error(R.drawable.ic_error))
                 .into(ivPoster);
 
         btnStart.setOnClickListener(view -> {
             Intent intent = new Intent(DetailCourseActivity.this, CourseReaderActivity.class);
-            intent.putExtra(CourseReaderActivity.EXTRA_COURSE_ID, courseId);
+            intent.putExtra(CourseReaderActivity.EXTRA_COURSE_ID, detailCourseViewModel.getCourseId());
             view.getContext().startActivity(intent);
         });
     }

@@ -10,20 +10,22 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.ayra.academy.R;
-import com.ayra.academy.data.ContentEntity;
-import com.ayra.academy.ui.reader.list.ModuleListFragment;
+import com.ayra.academy.data.ModuleEntity;
+import com.ayra.academy.ui.reader.CourseReaderViewModel;
 
 public class ModuleContentFragment extends Fragment {
     public static final String TAG = ModuleContentFragment.class.getSimpleName();
     private WebView webView;
     private ProgressBar progressBar;
+    private CourseReaderViewModel viewModel;
 
     public ModuleContentFragment() {
     }
 
-    public static Fragment newInstance() {
+    public static ModuleContentFragment newInstance() {
         return new ModuleContentFragment();
     }
 
@@ -46,13 +48,14 @@ public class ModuleContentFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getActivity() != null) {
-            ContentEntity entity = new ContentEntity("<h3 class=\\\"fr-text-bordered\\\">Contoh Content</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>");
-            populateWebView(entity);
+            viewModel = ViewModelProviders.of(getActivity()).get(CourseReaderViewModel.class);
+            ModuleEntity module = viewModel.getSelectedModule();
+            populateWebView(module);
         }
     }
 
-    private void populateWebView(ContentEntity entity) {
-        webView.loadData(entity.getmContent(), "text/html", "UTF-8");
+    private void populateWebView(ModuleEntity content) {
+        webView.loadData(content.contentEntity.getContent(), "text/html", "UTF-8");
     }
 
 }

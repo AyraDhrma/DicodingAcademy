@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,23 +18,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ayra.academy.R;
 import com.ayra.academy.data.ModuleEntity;
 import com.ayra.academy.ui.reader.CourseReaderCallback;
-import com.ayra.academy.utils.DataDummy;
+import com.ayra.academy.ui.reader.CourseReaderViewModel;
 
 import java.util.ArrayList;
 
 public class ModuleListFragment extends Fragment implements ModuleListAdapter.MyAdapterClickListener {
 
     public static final String TAG = ModuleListFragment.class.getSimpleName();
-    private ModuleListAdapter moduleListAdapter;
+    private ModuleListAdapter adapter;
     private CourseReaderCallback courseReaderCallback;
     private RecyclerView rvModuleCustom;
     private ProgressBar progressBar;
+    private CourseReaderViewModel viewModel;
 
     public ModuleListFragment() {
         // Required empty public constructor
     }
 
-    public static Fragment newInstance() {
+    public static ModuleListFragment newInstance() {
         return new ModuleListFragment();
     }
 
@@ -57,8 +59,9 @@ public class ModuleListFragment extends Fragment implements ModuleListAdapter.My
         super.onActivityCreated(savedInstanceState);
 
         if (getActivity() != null) {
-            moduleListAdapter = new ModuleListAdapter(this);
-            populateRecycleView(DataDummy.generateDummyModule("a14"));
+            viewModel = ViewModelProviders.of(getActivity()).get(CourseReaderViewModel.class);
+            adapter = new ModuleListAdapter(this);
+            populateRecycleView(viewModel.getModules());
         }
     }
 
@@ -70,10 +73,10 @@ public class ModuleListFragment extends Fragment implements ModuleListAdapter.My
 
     private void populateRecycleView(ArrayList<ModuleEntity> moduleEntities) {
         progressBar.setVisibility(View.GONE);
-        moduleListAdapter.setModule(moduleEntities);
+        adapter.setModule(moduleEntities);
         rvModuleCustom.setLayoutManager(new LinearLayoutManager(getContext()));
         rvModuleCustom.setHasFixedSize(true);
-        rvModuleCustom.setAdapter(moduleListAdapter);
+        rvModuleCustom.setAdapter(adapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvModuleCustom.getContext(), DividerItemDecoration.VERTICAL);
         rvModuleCustom.addItemDecoration(dividerItemDecoration);
     }
@@ -81,5 +84,6 @@ public class ModuleListFragment extends Fragment implements ModuleListAdapter.My
     @Override
     public void onItemClicked(int postion, String moduleId) {
         courseReaderCallback.moveTo(postion, moduleId);
+        viewModel.setSelectedModule(moduleId);
     }
 }

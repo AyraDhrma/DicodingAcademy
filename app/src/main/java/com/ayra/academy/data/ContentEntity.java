@@ -11,11 +11,11 @@ public class ContentEntity {
         this.mContent = content;
     }
 
-    public String getmContent() {
+    public String getContent() {
         return mContent;
     }
 
-    public void setmContent(String mContent) {
+    public void setContent(String mContent) {
         this.mContent = mContent;
     }
 

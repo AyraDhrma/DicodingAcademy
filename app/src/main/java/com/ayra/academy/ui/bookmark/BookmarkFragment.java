@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ShareCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,10 +20,14 @@ import com.ayra.academy.R;
 import com.ayra.academy.data.CourseEntity;
 import com.ayra.academy.utils.DataDummy;
 
+import java.util.List;
+
 public class BookmarkFragment extends Fragment implements BookmarkFragmentCallback{
     private BookmarkAdapter bookmarkAdapter;
     private RecyclerView rvBookmark;
     private ProgressBar progressBar;
+    private BookmarkViewModel bookmarkViewModel;
+    private List<CourseEntity> entities;
 
     public BookmarkFragment() {
 
@@ -64,8 +69,11 @@ public class BookmarkFragment extends Fragment implements BookmarkFragmentCallba
         super.onActivityCreated(savedInstanceState);
 
         if (getActivity() != null) {
+            bookmarkViewModel = ViewModelProviders.of(this).get(BookmarkViewModel.class);
+            entities = bookmarkViewModel.getBookmarks();
+
             bookmarkAdapter = new BookmarkAdapter(getActivity(), this);
-            bookmarkAdapter.setListCourse(DataDummy.generateDummyCourse());
+            bookmarkAdapter.setListCourse(entities);
 
             rvBookmark.setLayoutManager(new LinearLayoutManager(getContext()));
             rvBookmark.setHasFixedSize(true);
